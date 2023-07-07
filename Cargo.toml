@@ -18,6 +18,7 @@ embedded-hal = "0.2.3"
 pwm-pca9685 = "0.3.1"
 infrared = "0.14.1"
 embedded-storage = "0.2"
+micromath = "2.0.0"
 
 [dependencies.arduino-hal]
 git = "https://github.com/rahix/avr-hal"
