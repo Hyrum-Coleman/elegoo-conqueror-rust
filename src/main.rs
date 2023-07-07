@@ -10,7 +10,9 @@ use hardware::motor::Motor;
 
 use panic_halt as _;
 
+use arduino_hal::simple_pwm::*;
 use avr_device::{interrupt};
+
 type Console = arduino_hal::hal::usart::Usart0<arduino_hal::DefaultClock>;
 
 #[arduino_hal::entry]
@@ -23,8 +25,10 @@ fn main() -> ! {
 
     let mut led = pins.d13.into_output();
 
-    let right_speed_pin = pins.d5.into_output();
-    let left_speed_pin = pins.d6.into_output();
+    let timer0 = Timer0Pwm::new(dp.TC0, Prescaler::Prescale64);
+
+    let right_speed_pin = pins.d5.into_output().into_pwm(&timer0);
+    let left_speed_pin = pins.d6.into_output().into_pwm(&timer0);
     let right_power_pin = pins.d7.into_output();
     let left_power_pin = pins.d8.into_output();
     let standby = pins.d3.into_output();
@@ -33,6 +37,12 @@ fn main() -> ! {
     loop {
         led.toggle();
         println!("Working print macro!!!");
+        arduino_hal::delay_ms(1000);
+        println!("Turning motor on");
+        motor.drive_forwards();
+        arduino_hal::delay_ms(1000);
+        println!("Turning motor off");
+        motor.stop();
         arduino_hal::delay_ms(1000);
     }
 }
