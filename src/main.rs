@@ -34,10 +34,10 @@ fn main() -> ! {
     let standby = pins.d3.into_output();
 
     let mut motor = Motor::new(right_speed_pin, left_speed_pin, right_power_pin, left_power_pin, standby);
+    motor.enable();
+
     loop {
         led.toggle();
-        println!("Working print macro!!!");
-        arduino_hal::delay_ms(1000);
         println!("Turning motor on");
         motor.drive_forwards();
         arduino_hal::delay_ms(1000);

@@ -13,11 +13,17 @@ impl Motor {
         Self { right_speed_pin, left_speed_pin, right_power_pin, left_power_pin, standby_pin }
     }
 
+    pub fn enable(&mut self) {
+        self.standby_pin.set_high();
+        self.right_speed_pin.enable();
+        self.left_speed_pin.enable();
+    }
+
     pub fn drive_forwards(&mut self) {
         self.right_power_pin.set_high();
         self.left_power_pin.set_high();
-        self.right_speed_pin.set_duty(144);
-        self.left_speed_pin.set_duty(144);
+        self.right_speed_pin.set_duty(255);
+        self.left_speed_pin.set_duty(255);
     }
 
     pub fn stop(&mut self) {
