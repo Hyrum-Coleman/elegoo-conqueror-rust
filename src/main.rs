@@ -6,7 +6,7 @@ mod hardware;
 use tools::println;
 use tools::CONSOLE;
 
-use hardware::motor::Motor;
+use hardware::motor::{Motor, Direction};
 
 use panic_halt as _;
 
@@ -35,13 +35,38 @@ fn main() -> ! {
 
     let mut motor = Motor::new(right_speed_pin, left_speed_pin, right_power_pin, left_power_pin, standby);
     motor.enable();
+    let speed = 200;
 
     loop {
         led.toggle();
-        println!("Turning motor on");
-        motor.drive_forwards();
+        println!("Turning motor on: Going forwards");
+        motor.drive(Direction::Forwards, speed);
         arduino_hal::delay_ms(1000);
-        println!("Turning motor off");
+        println!("Turning left");
+        motor.drive(Direction::Left, speed);
+        arduino_hal::delay_ms(1000);
+        println!("Driving Backwards");
+        motor.drive(Direction::Backwards, speed);
+        arduino_hal::delay_ms(1000);
+        println!("Turning Right");
+        motor.drive(Direction::Right, speed);
+        arduino_hal::delay_ms(1000);
+        println!("Stopping motor");
+        motor.stop();
+        arduino_hal::delay_ms(1000);
+        println!("Forward Left");
+        motor.drive(Direction::ForwardsLeft, speed);
+        arduino_hal::delay_ms(1000);
+        println!("Backwards Right");
+        motor.drive(Direction::BackwardsRight, speed);
+        arduino_hal::delay_ms(1000);
+        println!("Forwards Right");
+        motor.drive(Direction::ForwardsRight, speed);
+        arduino_hal::delay_ms(1000);
+        println!("Backwards Left");
+        motor.drive(Direction::BackwardsLeft, speed);
+        arduino_hal::delay_ms(1000);
+        println!("Stopping");
         motor.stop();
         arduino_hal::delay_ms(1000);
     }

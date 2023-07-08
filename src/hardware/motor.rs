@@ -19,11 +19,17 @@ impl Motor {
         self.left_speed_pin.enable();
     }
 
-    pub fn drive_forwards(&mut self) {
-        self.right_power_pin.set_high();
-        self.left_power_pin.set_high();
-        self.right_speed_pin.set_duty(255);
-        self.left_speed_pin.set_duty(255);
+    pub fn drive(&mut self, direction: Direction, speed: u8) {
+        match direction {
+            Direction::Forwards => self.drive_forwards(speed),
+            Direction::Backwards => self.drive_backwards(speed),
+            Direction::Left => self.drive_left(speed),
+            Direction::Right => self.drive_right(speed),
+            Direction::ForwardsLeft => self.drive_forwards_left(speed),
+            Direction::ForwardsRight => self.drive_forwards_right(speed),
+            Direction::BackwardsLeft => self.drive_backwards_left(speed),
+            Direction::BackwardsRight => self.drive_backwards_right(speed),
+        }
     }
 
     pub fn stop(&mut self) {
@@ -32,4 +38,71 @@ impl Motor {
         self.right_speed_pin.set_duty(0);
         self.left_speed_pin.set_duty(0);
     }
+
+    fn drive_forwards(&mut self, speed: u8) {
+        self.right_power_pin.set_high();
+        self.left_power_pin.set_high();
+        self.right_speed_pin.set_duty(speed);
+        self.left_speed_pin.set_duty(speed);
+    }
+
+    fn drive_backwards(&mut self, speed: u8) {
+        self.right_power_pin.set_low();
+        self.left_power_pin.set_low();
+        self.right_speed_pin.set_duty(speed);
+        self.left_speed_pin.set_duty(speed);
+    }
+
+    fn drive_left(&mut self, speed: u8) {
+        self.right_power_pin.set_high();
+        self.left_power_pin.set_low();
+        self.right_speed_pin.set_duty(speed);
+        self.left_speed_pin.set_duty(speed);
+    }
+
+    fn drive_right(&mut self, speed: u8) {
+        self.right_power_pin.set_low();
+        self.left_power_pin.set_high();
+        self.right_speed_pin.set_duty(speed);
+        self.left_speed_pin.set_duty(speed);
+    }
+
+    fn drive_forwards_left(&mut self, speed: u8) {
+        self.right_power_pin.set_high();
+        self.left_power_pin.set_low();
+        self.right_speed_pin.set_duty(speed);
+        self.left_speed_pin.set_duty(speed - 50);
+    }
+
+    fn drive_forwards_right(&mut self, speed: u8) {
+        self.right_power_pin.set_low();
+        self.left_power_pin.set_high();
+        self.right_speed_pin.set_duty(speed - 50);
+        self.left_speed_pin.set_duty(speed);
+    }
+
+    fn drive_backwards_left(&mut self, speed: u8) {
+        self.right_power_pin.set_low();
+        self.left_power_pin.set_high();
+        self.right_speed_pin.set_duty(speed);
+        self.left_speed_pin.set_duty(speed - 50);
+    }
+
+    fn drive_backwards_right(&mut self, speed: u8) {
+        self.right_power_pin.set_high();
+        self.left_power_pin.set_low();
+        self.right_speed_pin.set_duty(speed - 50);
+        self.left_speed_pin.set_duty(speed);
+    }
+}
+
+pub enum Direction {
+    Forwards,
+    Backwards,
+    Left,
+    Right,
+    ForwardsLeft,
+    ForwardsRight,
+    BackwardsLeft,
+    BackwardsRight,
 }
