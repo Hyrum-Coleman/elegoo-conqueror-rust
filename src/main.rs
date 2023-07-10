@@ -1,17 +1,19 @@
 #![no_std]
 #![no_main]
-mod tools;
 mod hardware;
+mod tools;
 
 use tools::println;
 use tools::CONSOLE;
 
-use hardware::motor::{Motor, Direction};
+use hardware::motor::{Motor};
+use hardware::irmodule::IrModule;
 
 use panic_halt as _;
 
 use arduino_hal::simple_pwm::*;
-use avr_device::{interrupt};
+use arduino_hal::delay_ms;
+use avr_device::interrupt;
 
 type Console = arduino_hal::hal::usart::Usart0<arduino_hal::DefaultClock>;
 
@@ -20,6 +22,7 @@ fn main() -> ! {
     let dp = arduino_hal::Peripherals::take().unwrap();
     let pins = arduino_hal::pins!(dp);
     let serial = arduino_hal::default_serial!(dp, pins, 57600);
+    let mut adc = arduino_hal::Adc::new(dp.ADC, Default::default());
 
     tools::put_console(serial);
 
@@ -33,41 +36,26 @@ fn main() -> ! {
     let left_power_pin = pins.d8.into_output();
     let standby = pins.d3.into_output();
 
-    let mut motor = Motor::new(right_speed_pin, left_speed_pin, right_power_pin, left_power_pin, standby);
+    let mut motor = Motor::new(
+        right_speed_pin,
+        left_speed_pin,
+        right_power_pin,
+        left_power_pin,
+        standby,
+    );
     motor.enable();
     let speed = 200;
 
+    let ir_left = pins.a2.into_analog_input(&mut adc);
+    let ir_middle = pins.a1.into_analog_input(&mut adc);
+    let ir_rigt = pins.a0.into_analog_input(&mut adc);
+
+    let ir_module = IrModule::new(ir_left, ir_middle, ir_rigt);
+
     loop {
+        println!("Proving I am here");
         led.toggle();
-        println!("Turning motor on: Going forwards");
-        motor.drive(Direction::Forwards, speed);
-        arduino_hal::delay_ms(1000);
-        println!("Turning left");
-        motor.drive(Direction::Left, speed);
-        arduino_hal::delay_ms(1000);
-        println!("Driving Backwards");
-        motor.drive(Direction::Backwards, speed);
-        arduino_hal::delay_ms(1000);
-        println!("Turning Right");
-        motor.drive(Direction::Right, speed);
-        arduino_hal::delay_ms(1000);
-        println!("Stopping motor");
-        motor.stop();
-        arduino_hal::delay_ms(1000);
-        println!("Forward Left");
-        motor.drive(Direction::ForwardsLeft, speed);
-        arduino_hal::delay_ms(1000);
-        println!("Backwards Right");
-        motor.drive(Direction::BackwardsRight, speed);
-        arduino_hal::delay_ms(1000);
-        println!("Forwards Right");
-        motor.drive(Direction::ForwardsRight, speed);
-        arduino_hal::delay_ms(1000);
-        println!("Backwards Left");
-        motor.drive(Direction::BackwardsLeft, speed);
-        arduino_hal::delay_ms(1000);
-        println!("Stopping");
-        motor.stop();
-        arduino_hal::delay_ms(1000);
+        delay_ms(10);
+        motor.drive(ir_module.get_direction(&mut adc), speed);
     }
 }
