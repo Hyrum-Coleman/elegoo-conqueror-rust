@@ -6,23 +6,20 @@ mod tools;
 
 use tools::println;
 use tools::CONSOLE;
-
 use hardware::motor::{Motor};
 use hardware::sensors::{irmodule::IrModule, echo_module::SensorUnit};
-
-use panic_halt as _;
+use hardware::sensors::combined_sensor::CombinedSensor;
+use hardware::servo::ServoUnit;
 
 use arduino_hal::simple_pwm::*;
-use arduino_hal::delay_ms;
 use avr_device::interrupt;
 
-use crate::hardware::sensors::combined_sensor::CombinedSensor;
-use crate::hardware::servo::ServoUnit;
 
+use panic_halt as _;
 type Console = arduino_hal::hal::usart::Usart0<arduino_hal::DefaultClock>;
 
 #[arduino_hal::entry]
-fn main() -> ! {
+fn setup() -> ! {
     let dp = arduino_hal::Peripherals::take().unwrap();
     let pins = arduino_hal::pins!(dp);
     let serial = arduino_hal::default_serial!(dp, pins, 57600);
@@ -75,10 +72,17 @@ fn main() -> ! {
     motor.enable();
 
     let speed = 200;
+    let mut loop_number = 0;
 
     loop {
-        println!("Happy to be here");
-        delay_ms(10);
         motor.drive(combined_sensor.get_direction(&mut adc), speed);
+
+        loop_number += 1;
+        if loop_number % 20 == 0 {
+            println!("Happy to be here");
+        }
+        if loop_number > 1000 {
+            loop_number = 0;
+        }
     }
 }
