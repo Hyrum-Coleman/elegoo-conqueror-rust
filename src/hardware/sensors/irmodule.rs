@@ -63,7 +63,7 @@ impl IrModule {
         }
     }
 
-    fn car_off_line(&self, adc: &mut Adc) -> Direction {
+    fn car_off_line(&self, _adc: &mut Adc) -> Direction {
         // TODO: THIS NEEDS TO DO LINE PATHFINDING
         Direction::None
     }
