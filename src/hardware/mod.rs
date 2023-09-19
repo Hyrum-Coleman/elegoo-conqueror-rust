@@ -1,2 +1,3 @@
 pub mod motor;
-pub mod irmodule;
+pub mod sensors;
+pub mod servo;
