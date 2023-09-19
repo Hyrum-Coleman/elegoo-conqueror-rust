@@ -15,6 +15,7 @@ use panic_halt as _;
 use arduino_hal::simple_pwm::*;
 use arduino_hal::delay_ms;
 use avr_device::interrupt;
+
 use crate::hardware::sensors::combined_sensor::CombinedSensor;
 use crate::hardware::servo::ServoUnit;
 
@@ -30,7 +31,7 @@ fn main() -> ! {
     tools::put_console(serial);
 
     let timer0 = Timer0Pwm::new(dp.TC0, Prescaler::Prescale64);
-    let mut sensor_timer = dp.TC1;
+    let sensor_timer = dp.TC1;
     sensor_timer.tccr1b.write(|w| w.cs1().prescale_64());
 
     let mut timer2 = Timer2Pwm::new(dp.TC2, Prescaler::Prescale1024);
@@ -54,6 +55,9 @@ fn main() -> ! {
         servo: y_servo_pin
     };
     y_servo.look_right();
+    y_servo.look_front();
+    y_servo.look_left();
+    y_servo.look_front();
 
     let right_speed_pin = pins.d5.into_output().into_pwm(&timer0);
     let left_speed_pin = pins.d6.into_output().into_pwm(&timer0);
@@ -73,6 +77,7 @@ fn main() -> ! {
     let speed = 200;
 
     loop {
+        println!("Happy to be here");
         delay_ms(10);
         motor.drive(combined_sensor.get_direction(&mut adc), speed);
     }
