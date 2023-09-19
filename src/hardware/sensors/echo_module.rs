@@ -3,9 +3,6 @@ use arduino_hal::port::Pin;
 use arduino_hal::hal::port::{PB5, PB4};
 use avr_device::atmega328p::TC1;
 use embedded_hal::prelude::_embedded_hal_blocking_delay_DelayUs;
-use crate::tools::println;
-use avr_device::{interrupt};
-use crate::tools::CONSOLE;
 
 const TRIGGER_UP_TIME: u16 = 10u16;
 
@@ -38,7 +35,7 @@ impl SensorUnit {
             }
         }
 
-        self.timer.tcnt1.write(|w| unsafe { w.bits(0) });
+        self.timer.tcnt1.write(|w| w.bits(0));
 
         while self.echo.is_high() {}
 
