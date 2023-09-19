@@ -1,7 +1,7 @@
 use arduino_hal::hal::port::PB3;
 use arduino_hal::port::mode::PwmOutput;
 use arduino_hal::port::Pin;
-use arduino_hal::simple_pwm::{Timer0Pwm, Timer2Pwm};
+use arduino_hal::simple_pwm::Timer2Pwm;
 
 const SERVO_CENTER: u8 = 23;
 const SERVO_RIGHT: u8 = 15;
