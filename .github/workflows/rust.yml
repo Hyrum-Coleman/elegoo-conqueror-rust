@@ -25,8 +25,7 @@ jobs:
       - name: Toolchain info
         run: |
           cargo --version --verbose
-          rustc --version
-          cargo clippy --version              
+          rustc --version      
 
       - name: Test
         run: |
