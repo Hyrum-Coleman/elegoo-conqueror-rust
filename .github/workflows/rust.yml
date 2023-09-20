@@ -21,7 +21,7 @@ jobs:
         run: |
           rustup update
           rustup component add clippy
-          rustup comonent add rustfmt --toolchain nightly-2023-09-18-x86_64-unknown-linux-gnu
+          rustup component add rustfmt --toolchain nightly-2023-09-18-x86_64-unknown-linux-gnu
           rustup install nightly
 
       - name: Toolchain info
