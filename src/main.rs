@@ -12,6 +12,8 @@ use hardware::sensors::combined_sensor::CombinedSensor;
 use hardware::servo::ServoUnit;
 
 use arduino_hal::simple_pwm::*;
+use arduino_hal::{Adc, Pins};
+use avr_device::atmega328p::TC1;
 use avr_device::interrupt;
 
 
@@ -33,19 +35,8 @@ fn setup() -> ! {
 
     let mut timer2 = Timer2Pwm::new(dp.TC2, Prescaler::Prescale1024);
 
-    let trig_pin = pins.d13.into_output();
-    let echo_pin = pins.d12.into_floating_input();
 
-    let sensor_unit = SensorUnit::new(trig_pin, echo_pin, sensor_timer);
-
-    let ir_left = pins.a2.into_analog_input(&mut adc);
-    let ir_middle = pins.a1.into_analog_input(&mut adc);
-    let ir_right = pins.a0.into_analog_input(&mut adc);
-
-    let ir_module = IrModule::new(ir_left, ir_middle, ir_right);
-
-    let mut combined_sensor = CombinedSensor::new(ir_module, sensor_unit);
-
+    let combined_sensor = setup_sensors(&pins, &mut adc, sensor_timer);
     let mut y_servo_pin = pins.d11.into_output().into_pwm(&mut timer2);
     y_servo_pin.enable();
     let mut y_servo = ServoUnit {
@@ -56,19 +47,7 @@ fn setup() -> ! {
     y_servo.look_left();
     y_servo.look_front();
 
-    let right_speed_pin = pins.d5.into_output().into_pwm(&timer0);
-    let left_speed_pin = pins.d6.into_output().into_pwm(&timer0);
-    let right_power_pin = pins.d7.into_output();
-    let left_power_pin = pins.d8.into_output();
-    let standby = pins.d3.into_output();
-
-    let mut motor = Motor::new(
-        right_speed_pin,
-        left_speed_pin,
-        right_power_pin,
-        left_power_pin,
-        standby,
-    );
+    let mut motor = setup_motor(&pins, &timer0);
     motor.enable();
 
     let speed = 200;
@@ -85,4 +64,35 @@ fn setup() -> ! {
             loop_number = 0;
         }
     }
+}
+
+fn setup_motor(pins: &Pins, timer: &Timer0Pwm) -> Motor {
+    let right_speed_pin = pins.d5.into_output().into_pwm(timer);
+    let left_speed_pin = pins.d6.into_output().into_pwm(timer);
+    let right_power_pin = pins.d7.into_output();
+    let left_power_pin = pins.d8.into_output();
+    let standby = pins.d3.into_output();
+
+    Motor::new(
+        right_speed_pin,
+        left_speed_pin,
+        right_power_pin,
+        left_power_pin,
+        standby,
+    )
+}
+
+fn setup_sensors(pins: &Pins, adc: &mut Adc, sensor_timer: TC1) -> CombinedSensor {
+    let trig_pin = pins.d13.into_output();
+    let echo_pin = pins.d12.into_floating_input();
+
+    let sensor_unit = SensorUnit::new(trig_pin, echo_pin, sensor_timer);
+
+    let ir_left = pins.a2.into_analog_input(adc);
+    let ir_middle = pins.a1.into_analog_input(adc);
+    let ir_right = pins.a0.into_analog_input(adc);
+
+    let ir_module = IrModule::new(ir_left, ir_middle, ir_right);
+
+    let mut combined_sensor = CombinedSensor::new(ir_module, sensor_unit);
 }
